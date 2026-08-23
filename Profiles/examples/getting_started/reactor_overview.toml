@@ -1,0 +1,81 @@
+# Sub_Server example profile.
+# Four live plots covering the signals published by mock_data_node.py.
+# "start = '-1h'" means "one hour ago", re-evaluated every time the profile
+# loads, so this example stays useful no matter when you open it.
+
+name = "Reactor Overview"
+description = "Four live plots: core temperatures, coolant, the electrical bus and the turbine."
+layout = "2x2"
+created_by = "examples"
+refresh_ms = 1000
+format_version = 1
+
+[[plots]]
+title = "Core temperatures"
+y_label = "Kelvin"
+mode = "live"
+kind = "line"
+start = "-1h"
+show_legend = true
+show_grid = true
+
+[[plots.series]]
+variable = "reactor.core.temp_a"
+label = "Core A"
+color = "#4fc3f7"
+kind = "line"
+
+[[plots.series]]
+variable = "reactor.core.temp_b"
+label = "Core B"
+color = "#ffb74d"
+kind = "line"
+
+[[plots]]
+title = "Coolant flow"
+y_label = "litres / minute"
+mode = "live"
+kind = "area"
+start = "-1h"
+
+[[plots.series]]
+variable = "reactor.coolant.flow"
+label = "Flow"
+color = "#81c784"
+kind = "area"
+
+[[plots]]
+title = "Bus voltage and current"
+y_label = "volts / amps"
+mode = "live"
+kind = "line"
+start = "-30m"
+
+[[plots.series]]
+variable = "grid.bus.voltage"
+label = "Bus voltage"
+color = "#ba68c8"
+kind = "line"
+
+# Current is ~400 A against ~13.8 kV, so it gets the right-hand axis --
+# on a shared axis the current trace would be a flat line at the bottom.
+[[plots.series]]
+variable = "grid.bus.current"
+label = "Bus current (right axis)"
+color = "#4db6ac"
+kind = "line"
+y_axis = "right"
+
+[[plots]]
+title = "Turbine vibration"
+y_label = "mm/s RMS"
+mode = "live"
+kind = "scatter"
+start = "-30m"
+
+[[plots.series]]
+variable = "turbine.vibration"
+label = "Vibration"
+color = "#e57373"
+kind = "scatter"
+point_size = 2.0

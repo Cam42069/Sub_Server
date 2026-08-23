@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ program_name }}{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+  <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
+</head>
+<body data-csrf="{{ csrf_token }}">
+{% block banner %}
+<header class="banner">
+  <a class="banner-brand" href="{{ url_for('home') }}">
+    <span class="dot" id="node-indicator" title="Data node status"></span>
+    {{ program_name }}
+  </a>
+  <nav aria-label="Main">
+    <ul class="toolbar" id="toolbar">
+      <li>
+        <a class="toolbar-item {% if request.endpoint == 'home' %}active{% endif %}" href="{{ url_for('home') }}">Home</a>
+      </li>
+      <li>
+        <button type="button" class="toolbar-item {% if request.endpoint and request.endpoint.startswith('profile') %}active{% endif %}"
+                aria-haspopup="true" aria-expanded="false">Profiles <span class="caret">&#9660;</span></button>
+        <ul class="dropdown">
+          <li><a href="{{ url_for('profile_new') }}">Create New</a></li>
+          <li><a href="{{ url_for('profile_load') }}">Load</a></li>
+          <li><a href="{{ url_for('profile_browse') }}">Browse Shared</a></li>
+        </ul>
+      </li>
+      <li>
+        <button type="button" class="toolbar-item {% if request.endpoint == 'about' %}active{% endif %}"
+                aria-haspopup="true" aria-expanded="false">About <span class="caret">&#9660;</span></button>
+        <ul class="dropdown">
+          <li>
+            <a class="dropdown-static" href="{{ url_for('about') }}">
+              <strong>{{ program_name }}</strong>
+              Version {{ program_version }}
+            </a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </nav>
+  <div class="banner-right">
+    <span class="banner-user">{{ display_name or current_user }}</span>
+    <form method="post" action="{{ url_for('logout') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <button type="submit" class="btn small">Sign out</button>
+    </form>
+  </div>
+</header>
+{% endblock %}
+
+<main class="page {% block page_class %}{% endblock %}">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flashes">
+        {% for category, message in messages %}
+          <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</main>
+
+<div class="toast-stack" id="toasts" aria-live="polite"></div>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

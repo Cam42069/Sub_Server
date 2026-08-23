@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}{{ code }} &middot; {{ program_name }}{% endblock %}
+{% block banner %}{% if current_user %}{{ super() }}{% endif %}{% endblock %}
+{% block content %}
+<div class="panel" style="text-align:center; padding:3rem 1.5rem;">
+  <h1 style="font-size:3rem; margin-bottom:.25rem;">{{ code }}</h1>
+  <p class="subtitle">{{ message }}</p>
+  <a class="btn primary" href="{{ url_for('home') }}">Back to Home</a>
+</div>
+{% endblock %}

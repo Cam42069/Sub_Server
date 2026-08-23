@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}About &middot; {{ program_name }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>{{ program_name }}</h1>
+    <p class="subtitle">Version {{ program_version }}</p>
+  </div>
+</div>
+
+<div class="grid cols-2">
+  <section class="panel">
+    <h2>What this is</h2>
+    <p>
+      {{ program_name }} subscribes to a data access node over a socket, keeps the incoming
+      samples in memory, and serves them to this browser as live and static plots.
+    </p>
+    <p>
+      Plots are grouped into <strong>profiles</strong>: up to four plots saved together, kept
+      private to you or published to the shared library for everyone on this server.
+    </p>
+  </section>
+
+  <section class="panel">
+    <h2>Server status</h2>
+    <div class="stat-list">
+      <div class="stat">
+        <div class="label">Data node</div>
+        <div class="value {{ 'ok' if status.node.connected else 'bad' }}">{{ 'Connected' if status.node.connected else 'Offline' }}</div>
+        <div class="hint">{{ status.node.host }}:{{ status.node.port }}</div>
+      </div>
+      <div class="stat">
+        <div class="label">Memory in use</div>
+        <div class="value">{{ status.store.bytes_text }}</div>
+        <div class="hint">limit {{ status.store.max_bytes_text }}</div>
+      </div>
+      <div class="stat">
+        <div class="label">Samples ingested</div>
+        <div class="value">{{ '{:,}'.format(status.store.ingested) }}</div>
+        <div class="hint">{{ '{:,}'.format(status.store.dropped) }} aged out</div>
+      </div>
+      <div class="stat">
+        <div class="label">Variables</div>
+        <div class="value">{{ status.store.variables }}</div>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

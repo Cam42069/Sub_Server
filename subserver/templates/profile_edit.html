@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if mode == 'edit' else 'New' }} profile &middot; {{ program_name }}{% endblock %}
+{% block page_class %}wide{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div>
+    <h1>{% if mode == 'new' %}Create a new profile{% elif mode == 'copy' %}Copy this profile{% else %}Edit profile{% endif %}</h1>
+    <p class="subtitle">
+      {% if mode == 'copy' %}
+        <span class="tag {{ source_ref.scope }}">{{ source_ref.scope }}</span>
+        Read-only source &mdash; saving stores a copy in your private space.
+      {% else %}
+        Up to {{ editor_config.max_plots }} plots per profile. Live plots follow the data as it arrives.
+      {% endif %}
+    </p>
+  </div>
+</div>
+
+<section class="panel">
+  <div class="field-row">
+    <div class="field" style="flex: 2 1 260px">
+      <label for="profile-name">Profile name</label>
+      <input id="profile-name" type="text" maxlength="64" placeholder="Reactor overview" autocomplete="off">
+      <div class="hint">Letters, digits, spaces, <code>.</code> <code>_</code> <code>-</code></div>
+    </div>
+    <div class="field" style="flex: 0 0 170px">
+      <label for="profile-layout">Layout</label>
+      <select id="profile-layout">
+        {% for layout in editor_config.layouts %}<option value="{{ layout }}">{{ layout }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="field" style="flex: 0 0 190px">
+      <label for="profile-refresh">Live refresh (ms)</label>
+      <input id="profile-refresh" type="number" min="250" max="60000" step="250" value="1000">
+    </div>
+  </div>
+  <div class="field">
+    <label for="profile-description">Description <span class="hint" style="display:inline">(optional)</span></label>
+    <textarea id="profile-description" maxlength="500" rows="2"></textarea>
+  </div>
+</section>
+
+<div id="plots-container"></div>
+
+<div class="btn-row" style="margin-bottom:1.25rem">
+  <button type="button" class="btn" id="add-plot">+ Add plot</button>
+  <span class="hint" id="plot-count"></span>
+</div>
+
+<section class="panel">
+  <h2>Preview</h2>
+  <p class="subtitle">Draws the current settings without saving anything.</p>
+  <div class="btn-row" style="margin-bottom:1rem">
+    <button type="button" class="btn" id="preview-btn">Refresh preview</button>
+    <label class="inline-check"><input type="checkbox" id="preview-live"> Keep the preview updating</label>
+  </div>
+  <div class="plot-grid layout-2x2" id="preview-grid"></div>
+</section>
+
+<div class="sticky-actions">
+  <div class="field" style="margin:0; flex:0 0 230px">
+    <label for="save-folder">Folder</label>
+    <select id="save-folder"></select>
+  </div>
+  <button type="button" class="btn small" id="new-folder-btn">New folder…</button>
+  <div class="spacer"></div>
+  <button type="button" class="btn primary" id="save-btn">Save to my profiles</button>
+  <button type="button" class="btn" id="publish-btn">Publish to shared</button>
+</div>
+
+<dialog id="folder-dialog">
+  <h2>Create a folder</h2>
+  <div class="field">
+    <label for="dialog-folder-scope">Space</label>
+    <select id="dialog-folder-scope">
+      <option value="private">Private (Profiles/private/{{ current_user }}/…)</option>
+      <option value="shared">Shared (Profiles/shared/{{ current_user }}/…)</option>
+    </select>
+  </div>
+  <div class="field">
+    <label for="dialog-folder-path">Folder path</label>
+    <input id="dialog-folder-path" type="text" placeholder="experiments/august" autocomplete="off">
+    <div class="hint">Use <code>/</code> to nest folders.</div>
+  </div>
+  <div class="btn-row" style="justify-content:flex-end">
+    <button type="button" class="btn" data-close>Cancel</button>
+    <button type="button" class="btn primary" id="dialog-folder-create">Create</button>
+  </div>
+</dialog>
+
+<dialog id="publish-dialog">
+  <h2>Publish to the shared library</h2>
+  <p class="subtitle">
+    Shared profiles are never overwritten. If the name is already taken, this one is
+    saved as <code>name_1</code>, <code>name_2</code>, and so on.
+  </p>
+  <div class="field">
+    <label for="publish-name">Published name</label>
+    <input id="publish-name" type="text" maxlength="64" autocomplete="off">
+  </div>
+  <div class="field">
+    <label for="publish-folder">Folder in your shared space</label>
+    <select id="publish-folder"></select>
+  </div>
+  <div class="btn-row" style="justify-content:flex-end">
+    <button type="button" class="btn" data-close>Cancel</button>
+    <button type="button" class="btn primary" id="publish-confirm">Publish</button>
+  </div>
+</dialog>
+
+<script id="editor-profile" type="application/json">{{ profile | tojson }}</script>
+<script id="editor-config" type="application/json">
+  {{ {'options': editor_config, 'ref': ref.as_dict() if ref else None, 'mode': mode, 'user': current_user} | tojson }}
+</script>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/plot.js') }}"></script>
+<script src="{{ url_for('static', filename='js/profile_edit.js') }}"></script>
+{% endblock %}
