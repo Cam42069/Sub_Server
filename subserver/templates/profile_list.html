@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} &middot; {{ program_name }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>{{ title }}</h1>
+    <p class="subtitle">{{ subtitle }}</p>
+  </div>
+  <div class="btn-row">
+    <a class="btn primary" href="{{ url_for('profile_new') }}">Create New</a>
+  </div>
+</div>
+
+<div class="panel">
+  <label for="profile-filter" class="visually-hidden">Filter profiles</label>
+  <input id="profile-filter" type="search" placeholder="Filter by name, owner or folder&hellip;" autocomplete="off">
+</div>
+
+{% for group_name, entries, deletable in groups %}
+<section class="panel" data-group>
+  <h2>{{ group_name }} <span class="tag">{{ entries|length }}</span></h2>
+  {% if entries %}
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          {% if group_name == 'Shared' %}<th>Published by</th>{% endif %}
+          <th>Folder</th><th>Plots</th><th>Updated</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for entry in entries %}
+        <tr data-search="{{ (entry.title ~ ' ' ~ entry.name ~ ' ' ~ entry.owner ~ ' ' ~ entry.folder ~ ' ' ~ entry.description)|lower }}">
+          <td>
+            <a href="{{ url_for('profile_view', scope=entry.scope, owner=entry.owner, folder=entry.folder, name=entry.name) }}">{{ entry.title }}</a>
+            <span class="tag {{ entry.scope }}">{{ entry.scope }}</span>
+            {% if entry.description %}<div class="hint">{{ entry.description }}</div>{% endif %}
+            {% if entry.error %}<div class="plot-error">{{ entry.error }}</div>{% endif %}
+          </td>
+          {% if group_name == 'Shared' %}<td>{{ entry.owner }}</td>{% endif %}
+          <td class="mono">{{ entry.folder or '/' }}</td>
+          <td>{{ entry.plot_count }}</td>
+          <td class="hint" data-epoch="{{ entry.modified }}">&mdash;</td>
+          <td class="actions">
+            <a class="btn small" href="{{ url_for('profile_view', scope=entry.scope, owner=entry.owner, folder=entry.folder, name=entry.name) }}">Open</a>
+            <a class="btn small" href="{{ url_for('profile_edit', scope=entry.scope, owner=entry.owner, folder=entry.folder, name=entry.name) }}">{{ 'Edit' if deletable else 'Copy' }}</a>
+            {% if deletable %}
+              <button type="button" class="btn small danger" data-delete
+                      data-scope="{{ entry.scope }}" data-owner="{{ entry.owner }}"
+                      data-folder="{{ entry.folder }}" data-name="{{ entry.name }}">Delete</button>
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="empty">Nothing here yet.</p>
+  {% endif %}
+</section>
+{% endfor %}
+
+{% if folders %}
+<section class="panel">
+  <h2>Your folders</h2>
+  <p class="subtitle">Organise your private space however you like. Folders you create here are also offered when publishing.</p>
+  <ul class="mono" style="columns: 3; list-style: none; padding: 0;">
+    {% for folder in folders %}<li>{{ folder or '/' }}</li>{% endfor %}
+  </ul>
+  <form class="field-row" id="folder-form" style="margin-top:1rem; align-items:flex-end;">
+    <div class="field">
+      <label for="new-folder">New folder path</label>
+      <input id="new-folder" type="text" placeholder="experiments/august" autocomplete="off">
+    </div>
+    <div class="field" style="flex:0 0 auto">
+      <label for="folder-scope">Space</label>
+      <select id="folder-scope"><option value="private">Private</option><option value="shared">Shared</option></select>
+    </div>
+    <div class="field" style="flex:0 0 auto"><button class="btn" type="submit">Create folder</button></div>
+  </form>
+</section>
+{% endif %}
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/profile_list.js') }}"></script>{% endblock %}

@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Home &middot; {{ program_name }}{% endblock %}
+{% block content %}
+
+<section class="welcome">
+  <h1>Welcome back {{ display_name or current_user }}!</h1>
+  <p>{{ program_name }} {{ program_version }} &mdash; live and historical plots from the data access node.</p>
+</section>
+
+<div class="grid cols-2">
+  <section class="panel">
+    <h2>Data subscription</h2>
+    <div class="stat-list" id="status-stats">
+      <div class="stat">
+        <div class="label">Node</div>
+        <div class="value {{ 'ok' if status.node.connected else 'bad' }}" data-stat="node-state">
+          {{ 'Connected' if status.node.connected else 'Offline' }}
+        </div>
+        <div class="hint">{{ status.node.host }}:{{ status.node.port }}</div>
+      </div>
+      <div class="stat">
+        <div class="label">Variables</div>
+        <div class="value" data-stat="variables">{{ status.store.variables }}</div>
+        <div class="hint">tracked in memory</div>
+      </div>
+      <div class="stat">
+        <div class="label">Samples held</div>
+        <div class="value" data-stat="samples">{{ '{:,}'.format(status.store.samples) }}</div>
+        <div class="hint" data-stat="span">{{ status.store.span_text or 'no data yet' }}</div>
+      </div>
+      <div class="stat">
+        <div class="label">Memory</div>
+        <div class="value" data-stat="memory">{{ status.store.bytes_text }}</div>
+        <div class="hint">of {{ status.store.max_bytes_text }}</div>
+        <div class="meter"><span data-stat="memory-bar" style="width: {{ (status.store.usage_fraction * 100)|round(1) }}%"></span></div>
+      </div>
+    </div>
+    {% if status.node.last_error %}
+      <p class="plot-error" data-stat="node-error">{{ status.node.last_error }}</p>
+    {% else %}
+      <p class="plot-error" data-stat="node-error" style="display:none"></p>
+    {% endif %}
+  </section>
+
+  <section class="panel">
+    <h2>Get started</h2>
+    <p class="subtitle">A profile is a saved arrangement of up to four plots &mdash; live, static, or both.</p>
+    <div class="btn-row" style="margin-top:1rem">
+      <a class="btn primary" href="{{ url_for('profile_new') }}">Create a new profile</a>
+      <a class="btn" href="{{ url_for('profile_load') }}">Load a profile</a>
+      <a class="btn" href="{{ url_for('profile_browse') }}">Browse shared</a>
+    </div>
+    <div class="stat-list" style="margin-top:1.25rem">
+      <div class="stat"><div class="label">Your profiles</div><div class="value">{{ counts.private }}</div></div>
+      <div class="stat"><div class="label">Shared</div><div class="value">{{ counts.shared }}</div></div>
+      <div class="stat"><div class="label">Examples</div><div class="value">{{ counts.examples }}</div></div>
+    </div>
+  </section>
+</div>
+
+<section class="panel">
+  <h2>Recently saved</h2>
+  {% if recent %}
+    <table>
+      <thead><tr><th>Profile</th><th>Folder</th><th>Plots</th><th>Updated</th><th></th></tr></thead>
+      <tbody>
+      {% for entry in recent %}
+        <tr>
+          <td>
+            <a href="{{ url_for('profile_view', scope=entry.scope, owner=entry.owner, folder=entry.folder, name=entry.name) }}">{{ entry.title }}</a>
+            {% if entry.description %}<div class="hint">{{ entry.description }}</div>{% endif %}
+          </td>
+          <td class="mono">{{ entry.folder or '/' }}</td>
+          <td>{{ entry.plot_count }}</td>
+          <td class="hint" data-epoch="{{ entry.modified }}">&mdash;</td>
+          <td class="actions">
+            <a class="btn small" href="{{ url_for('profile_edit', scope=entry.scope, owner=entry.owner, folder=entry.folder, name=entry.name) }}">Edit</a>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="empty">You have not saved any profiles yet. <a href="{{ url_for('profile_new') }}">Create your first one.</a></p>
+  {% endif %}
+</section>
+
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/home.js') }}"></script>{% endblock %}

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}{{ profile.name }} &middot; {{ program_name }}{% endblock %}
+{% block page_class %}wide{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>{{ profile.name }}</h1>
+    <p class="subtitle">
+      <span class="tag {{ ref.scope }}">{{ ref.scope }}</span>
+      <span class="mono">{{ ref.display_path }}</span>
+      {% if profile.created_by %}&middot; by {{ profile.created_by }}{% endif %}
+    </p>
+    {% if profile.description %}<p class="subtitle">{{ profile.description }}</p>{% endif %}
+  </div>
+  <div class="btn-row">
+    <span class="hint" id="refresh-status">&mdash;</span>
+    <button type="button" class="btn" id="pause-btn" data-paused="false">Pause live updates</button>
+    <a class="btn" href="{{ url_for('profile_edit', scope=ref.scope, owner=ref.owner, folder=ref.folder, name=ref.name) }}">
+      {{ 'Edit' if can_edit else 'Copy to my profiles' }}
+    </a>
+  </div>
+</div>
+
+<div class="plot-grid layout-{{ profile.layout }}" id="plot-grid">
+  {% for plot in profile.plots %}
+    <article class="plot-card" data-plot-index="{{ loop.index0 }}">
+      <div class="plot-head">
+        <span class="plot-title">{{ plot.title }}</span>
+        <span class="plot-mode {{ plot.mode }}">{{ plot.mode }}</span>
+      </div>
+      <div class="plot-canvas-wrap">
+        <canvas></canvas>
+        <div class="plot-tooltip"></div>
+      </div>
+      <div class="plot-legend"></div>
+      <div class="plot-note" style="display:none"></div>
+      <div class="plot-error" style="display:none"></div>
+    </article>
+  {% endfor %}
+</div>
+
+<script id="view-config" type="application/json">
+  {{ {'ref': ref.as_dict(), 'refresh_ms': profile.refresh_ms or refresh_ms,
+      'has_live': profile.plots | selectattr('mode', 'equalto', 'live') | list | length > 0} | tojson }}
+</script>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/plot.js') }}"></script>
+<script src="{{ url_for('static', filename='js/profile_view.js') }}"></script>
+{% endblock %}

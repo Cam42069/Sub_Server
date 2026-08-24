@@ -1,0 +1,95 @@
+# Sub_Server example profile.
+# Shows the two things beyond plain plotting: a static window with fixed
+# start/end times, and plots driven by a user function.
+# Functions come from Functions/examples/statistics.py.
+
+name = "Function Demo"
+description = "A smoothed trace, a derivative, summary reference lines and a static window."
+layout = "2x2"
+created_by = "examples"
+refresh_ms = 2000
+format_version = 1
+
+[[plots]]
+title = "Raw vs smoothed core temperature"
+y_label = "Kelvin"
+mode = "live"
+kind = "line"
+start = "-30m"
+
+[[plots.series]]
+variable = "reactor.core.temp_a"
+label = "Core A"
+color = "#4fc3f7"
+kind = "line"
+
+[plots.function]
+module = "statistics"
+name = "rolling_mean"
+scope = "examples"
+replace_series = false
+
+[plots.function.args]
+window = 30
+
+[[plots]]
+title = "Rate of change, bus current"
+y_label = "amps / minute"
+mode = "live"
+kind = "line"
+start = "-30m"
+
+[[plots.series]]
+variable = "grid.bus.current"
+label = "Bus current"
+color = "#ffb74d"
+
+[plots.function]
+module = "statistics"
+name = "rate_of_change"
+scope = "examples"
+replace_series = true
+
+[plots.function.args]
+per_seconds = 60.0
+
+[[plots]]
+title = "Coolant flow with mean, min and max"
+y_label = "litres / minute"
+mode = "live"
+kind = "line"
+start = "-30m"
+
+[[plots.series]]
+variable = "reactor.coolant.flow"
+label = "Flow"
+color = "#81c784"
+
+[plots.function]
+module = "statistics"
+name = "summary"
+scope = "examples"
+replace_series = false
+
+[[plots]]
+title = "Normalised comparison"
+y_label = "0 to 1"
+mode = "live"
+kind = "line"
+start = "-15m"
+
+[[plots.series]]
+variable = "reactor.core.pressure"
+label = "Pressure"
+color = "#ba68c8"
+
+[[plots.series]]
+variable = "turbine.rpm"
+label = "Turbine RPM"
+color = "#4db6ac"
+
+[plots.function]
+module = "statistics"
+name = "normalise"
+scope = "examples"
+replace_series = true

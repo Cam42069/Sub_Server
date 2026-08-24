@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Create a user &middot; {{ program_name }}</title>
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+</head>
+<body>
+<div class="auth-wrap">
+  <div class="auth-card">
+    <h1>Create a user</h1>
+    <p class="tagline">You get your own private and shared profile folders.</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    <form method="post" action="{{ url_for('register') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <div class="field">
+        <label for="username">Username</label>
+        <input id="username" name="username" type="text" autocomplete="username"
+               value="{{ username }}" required autofocus pattern="[a-zA-Z0-9][a-zA-Z0-9_\-]{2,31}">
+        <div class="hint">3&ndash;32 characters: letters, digits, <code>_</code> or <code>-</code>.</div>
+      </div>
+      <div class="field">
+        <label for="display_name">Display name <span class="hint" style="display:inline">(optional)</span></label>
+        <input id="display_name" name="display_name" type="text" value="{{ display_name }}" autocomplete="nickname">
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" autocomplete="new-password" required minlength="8">
+        <div class="hint">At least 8 characters.</div>
+      </div>
+      <div class="field">
+        <label for="confirm">Confirm password</label>
+        <input id="confirm" name="confirm" type="password" autocomplete="new-password" required minlength="8">
+      </div>
+      <button type="submit" class="btn primary" style="width:100%; justify-content:center;">Create account</button>
+    </form>
+
+    <div class="auth-alt">Already registered? <a href="{{ url_for('login') }}">Sign in</a></div>
+  </div>
+</div>
+</body>
+</html>

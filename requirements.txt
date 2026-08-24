@@ -1,0 +1,8 @@
+# Core runtime dependencies
+Flask>=3.0
+numpy>=1.24
+cryptography>=41.0      # self-signed certificate generation for HTTPS
+
+# Optional: enables user functions that return a matplotlib Figure.
+# The server runs fine without it (function plots must then return data series).
+matplotlib>=3.7

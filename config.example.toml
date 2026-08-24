@@ -1,0 +1,50 @@
+# Sub_Server configuration.
+# Copy to "config.toml" and edit.  Every value below is optional; the
+# defaults shown are what the server uses when the key is absent.
+
+[server]
+host = "0.0.0.0"        # 0.0.0.0 exposes the server to the local network
+port = 8443
+# Paths are relative to the project root unless absolute.
+cert_file = "data/certs/server.crt"
+key_file  = "data/certs/server.key"
+# Extra names/IPs to place in the certificate's SAN list so browsers on the
+# LAN can verify the host name they actually typed.
+cert_hostnames = []
+
+[data_node]
+host = "127.0.0.1"
+port = 980
+# Variables to subscribe to.  ["*"] subscribes to everything the node offers.
+variables = ["*"]
+# Seconds to wait between reconnect attempts (exponential, capped).
+reconnect_min_delay = 1.0
+reconnect_max_delay = 30.0
+# Ask the node for this many seconds of history on connect (0 disables).
+backfill_seconds = 3600
+# Allow on-demand history requests when a plot asks for data older than
+# what is currently held in RAM.
+allow_history_requests = true
+
+[store]
+# Hard ceiling on the sample memory held in RAM.  When exceeded, the oldest
+# samples are dropped until usage is back under the limit.
+max_bytes = 4_000_000_000     # ~4 GB
+# Never keep more than this many seconds of data, regardless of memory use.
+# 0 means "no time limit, memory limit only".
+max_age_seconds = 0
+
+[plots]
+# Maximum points sent to the browser per series.  Larger ranges are
+# min/max decimated so peaks survive the reduction.
+max_points_per_series = 4000
+# How often live plots poll the server, in milliseconds.
+live_refresh_ms = 1000
+
+[security]
+# Allow anyone reaching the login page to register an account.
+allow_registration = true
+# User-authored Python functions execute inside the server process.
+# See the "Security" section of README.md before enabling.
+allow_user_functions = true
+session_lifetime_hours = 12
