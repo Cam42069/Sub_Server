@@ -184,9 +184,26 @@ short-lived connection so a slow reply cannot stall the live stream.
 The subscription reconnects on its own with exponential backoff, so a node
 restart needs no operator action.
 
-`mock_data_node.py` implements all of the above and answers live and history
-requests from the same deterministic signals, so a live plot and a static plot
-of the same window agree.
+Two stand-in nodes ship with the project, both stdlib-only:
+
+* **`mock_data_node.py`** — twelve plant-flavoured signals (core temperatures,
+  coolant flow, bus voltage…) built from sines plus seeded noise. Because they
+  are deterministic, history is recomputed on demand and a static plot always
+  agrees with the live one.
+* **`test_dan.py`** — a smaller, simpler node publishing seven **random**
+  signals: five random walks, a monotonic counter and a 0/1 state. It keeps
+  every sample it emits in memory and serves history straight out of that
+  buffer, so history is exactly what was streamed. Start it with `--seed` for a
+  repeatable run, or `--backlog` to choose how much history exists at start-up.
+
+```bash
+python3 test_dan.py --port 9000 --interval 0.5 --seed 7
+python3 run_server.py --node-port 9000
+```
+
+The counter is there on purpose: it climbs by one every tick, so if ordering,
+decimation or the incremental cursor ever breaks, the trace stops being a
+straight line and says so.
 
 ---
 
@@ -287,8 +304,10 @@ account handling, user functions, and the HTTP layer end to end.
 
 ```
 run_server.py               entry point
-mock_data_node.py           stand-in data access node
+mock_data_node.py           stand-in data access node (deterministic signals)
+test_dan.py                 stand-in data access node (random signals)
 config.example.toml         annotated configuration
+pytest.ini                  pins the suite to tests/
 subserver/
 ├── app.py                  Flask routes, sessions, JSON API
 ├── auth.py                 accounts and password hashing
